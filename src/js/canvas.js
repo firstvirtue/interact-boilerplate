@@ -2,9 +2,12 @@ import utils from './utils'
 
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
+c.scale(2, 2);
 
 canvas.width = innerWidth
 canvas.height = innerHeight
+
+let indicator;
 
 const mouse = {
   x: innerWidth / 2,
@@ -26,6 +29,76 @@ addEventListener('resize', () => {
   init()
 })
 
+class Indicator {
+  constructor() {
+    this.bars = [];
+
+    this.length = 100;
+    this.unit = 5;
+  }
+
+  resize() {
+
+  }
+
+  init() {
+    for (let i = 0; i < this.length; i++) {
+      const bar = new Bar(this.length, this.unit, (this.length * this.unit / 2) + (i * this.unit));
+      this.bars.push(bar);
+    }
+  }
+
+  draw(c) {
+    this.bars.forEach(el => {
+      el.draw(c);
+      el.update();
+    })
+  }
+}
+
+class Bar {
+  constructor(length, unit, x) {
+    this.unit = unit;
+    this.length = length;
+
+    this.tall = Math.random() * 10 + 5;
+    this.y = 200;
+    this.x = x;
+    this.speed = 2;
+    this.cur = 0;
+  }
+
+  resize() {
+    
+  }
+
+  init() {
+
+  }
+
+  update() {
+    this.x = this.x - 2;
+
+    if(this.x <= -(this.length * this.unit / 2)) {
+      this.x = (this.length * this.unit / 2);
+      this.cur = 0;
+    }
+
+    if(this.x < (this.length * this.unit / 2)) {
+      if(this.cur <= this.tall) {
+        this.cur += this.speed;
+      }
+    }
+  }
+
+  // just one
+  draw(c) {
+    // end
+    // console.log(this.cur);
+    c.fillRect(this.x, this.y, 2, this.cur);
+  }
+}
+
 // Objects
 class Object {
   constructor(x, y, radius, color) {
@@ -37,7 +110,7 @@ class Object {
 
   draw() {
     c.beginPath()
-    c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+    // c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
     c.fillStyle = this.color
     c.fill()
     c.closePath()
@@ -56,6 +129,9 @@ function init() {
   for (let i = 0; i < 400; i++) {
     // objects.push()
   }
+
+  indicator = new Indicator();
+  indicator.init();
 }
 
 // Animation Loop
@@ -67,6 +143,8 @@ function animate() {
   // objects.forEach(object => {
   //  object.update()
   // })
+
+  indicator.draw(c);
 }
 
 init()

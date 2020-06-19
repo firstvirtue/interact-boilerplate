@@ -106,8 +106,10 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 var canvas = document.querySelector('canvas');
 var c = canvas.getContext('2d');
+c.scale(2, 2);
 canvas.width = innerWidth;
 canvas.height = innerHeight;
+var indicator;
 var mouse = {
   x: innerWidth / 2,
   y: innerHeight / 2
@@ -122,11 +124,93 @@ addEventListener('resize', function () {
   canvas.width = innerWidth;
   canvas.height = innerHeight;
   init();
-}); // Objects
+});
+
+var Indicator = /*#__PURE__*/function () {
+  function Indicator() {
+    _classCallCheck(this, Indicator);
+
+    this.bars = [];
+    this.length = 100;
+    this.unit = 5;
+  }
+
+  _createClass(Indicator, [{
+    key: "resize",
+    value: function resize() {}
+  }, {
+    key: "init",
+    value: function init() {
+      for (var i = 0; i < this.length; i++) {
+        var bar = new Bar(this.length, this.unit, this.length * this.unit / 2 + i * this.unit);
+        this.bars.push(bar);
+      }
+    }
+  }, {
+    key: "draw",
+    value: function draw(c) {
+      this.bars.forEach(function (el) {
+        el.draw(c);
+        el.update();
+      });
+    }
+  }]);
+
+  return Indicator;
+}();
+
+var Bar = /*#__PURE__*/function () {
+  function Bar(length, unit, x) {
+    _classCallCheck(this, Bar);
+
+    this.unit = unit;
+    this.length = length;
+    this.tall = Math.random() * 10 + 5;
+    this.y = 200;
+    this.x = x;
+    this.speed = 2;
+    this.cur = 0;
+  }
+
+  _createClass(Bar, [{
+    key: "resize",
+    value: function resize() {}
+  }, {
+    key: "init",
+    value: function init() {}
+  }, {
+    key: "update",
+    value: function update() {
+      this.x = this.x - 2;
+
+      if (this.x <= -(this.length * this.unit / 2)) {
+        this.x = this.length * this.unit / 2;
+        this.cur = 0;
+      }
+
+      if (this.x < this.length * this.unit / 2) {
+        if (this.cur <= this.tall) {
+          this.cur += this.speed;
+        }
+      }
+    } // just one
+
+  }, {
+    key: "draw",
+    value: function draw(c) {
+      // end
+      // console.log(this.cur);
+      c.fillRect(this.x, this.y, 2, this.cur);
+    }
+  }]);
+
+  return Bar;
+}(); // Objects
+
 
 var _Object = /*#__PURE__*/function () {
-  function Object(x, y, radius, color) {
-    _classCallCheck(this, Object);
+  function _Object(x, y, radius, color) {
+    _classCallCheck(this, _Object);
 
     this.x = x;
     this.y = y;
@@ -134,11 +218,11 @@ var _Object = /*#__PURE__*/function () {
     this.color = color;
   }
 
-  _createClass(Object, [{
+  _createClass(_Object, [{
     key: "draw",
     value: function draw() {
-      c.beginPath();
-      c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+      c.beginPath(); // c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+
       c.fillStyle = this.color;
       c.fill();
       c.closePath();
@@ -150,7 +234,7 @@ var _Object = /*#__PURE__*/function () {
     }
   }]);
 
-  return Object;
+  return _Object;
 }(); // Implementation
 
 
@@ -161,6 +245,9 @@ function init() {
 
   for (var i = 0; i < 400; i++) {// objects.push()
   }
+
+  indicator = new Indicator();
+  indicator.init();
 } // Animation Loop
 
 
@@ -170,6 +257,8 @@ function animate() {
   c.fillText('HTML CANVAS BOILERPLATE', mouse.x, mouse.y); // objects.forEach(object => {
   //  object.update()
   // })
+
+  indicator.draw(c);
 }
 
 init();
