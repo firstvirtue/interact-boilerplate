@@ -33,7 +33,7 @@ class Indicator {
   constructor() {
     this.bars = [];
 
-    this.length = 100;
+    this.length = 120;
     this.unit = 5;
   }
 
@@ -62,7 +62,7 @@ class Bar {
     this.length = length;
 
     this.tall = Math.random() * 10 + 5;
-    this.y = 200;
+    this.y = 600;
     this.x = x;
     this.speed = 2;
     this.cur = 0;
