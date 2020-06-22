@@ -2,7 +2,7 @@ import utils from './utils'
 
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
-c.scale(2, 2);
+c.scale(2, 2); // FIXME: Not working
 
 canvas.width = innerWidth
 canvas.height = innerHeight
@@ -34,7 +34,7 @@ class Indicator {
     this.bars = [];
 
     this.length = 120;
-    this.unit = 5;
+    this.unit = 4;
   }
 
   resize() {
@@ -50,8 +50,8 @@ class Indicator {
 
   draw(c) {
     this.bars.forEach(el => {
-      el.draw(c);
       el.update();
+      el.draw(c);
     })
   }
 }
@@ -61,11 +61,11 @@ class Bar {
     this.unit = unit;
     this.length = length;
 
-    this.tall = Math.random() * 10 + 5;
+    this.height = Math.random() * 10 + 5;
     this.y = 600;
     this.x = x;
-    this.speed = 2;
-    this.cur = 0;
+    this.speed = 0.4;
+    this.currentHeight = 1;
   }
 
   resize() {
@@ -79,14 +79,14 @@ class Bar {
   update() {
     this.x = this.x - 2;
 
-    if(this.x <= -(this.length * this.unit / 2)) {
-      this.x = (this.length * this.unit / 2);
-      this.cur = 0;
+    if(this.x <= 0) {
+      this.x = (this.length * this.unit);
+      this.currentHeight = 1;
     }
 
     if(this.x < (this.length * this.unit / 2)) {
-      if(this.cur <= this.tall) {
-        this.cur += this.speed;
+      if(this.currentHeight <= this.height) {
+        this.currentHeight += this.speed;
       }
     }
   }
@@ -94,8 +94,8 @@ class Bar {
   // just one
   draw(c) {
     // end
-    // console.log(this.cur);
-    c.fillRect(this.x, this.y, 2, this.cur);
+    // console.log(this.currentHeight);
+    c.fillRect(this.x, this.y, 2, this.currentHeight);
   }
 }
 
@@ -108,13 +108,13 @@ class Object {
     this.color = color
   }
 
-  draw() {
-    c.beginPath()
+  // draw() {
+    // c.beginPath()
     // c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
-    c.fillStyle = this.color
-    c.fill()
-    c.closePath()
-  }
+    // c.fillStyle = this.color
+    // c.fill()
+    // c.closePath()
+  // }
 
   update() {
     this.draw()
