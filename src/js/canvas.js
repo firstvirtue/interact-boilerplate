@@ -1,17 +1,18 @@
 import utils from './utils'
+import Vector from './vector'
 
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 c.scale(2, 2); // FIXME: Not working
 
-canvas.width = innerWidth
-canvas.height = innerHeight
+canvas.width = document.documentElement.clientWidth
+canvas.height = document.documentElement.clientHeight
 
 let indicator;
 
 const mouse = {
-  x: innerWidth / 2,
-  y: innerHeight / 2
+  x: document.documentElement.clientWidth / 2,
+  y: document.documentElement.clientHeight / 2
 }
 
 const colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66']
@@ -23,18 +24,25 @@ addEventListener('mousemove', (event) => {
 })
 
 addEventListener('resize', () => {
-  canvas.width = innerWidth
-  canvas.height = innerHeight
+  canvas.width = document.documentElement.clientWidth
+  canvas.height = document.documentElement.clientHeight
 
   init()
+})
+
+document.querySelector('.btn--bezier').addEventListener('click', () => {
+  indicator.setState('bezier');
+})
+document.querySelector('.btn--linear').addEventListener('click', () => {
+  indicator.setState('default');
 })
 
 class Indicator {
   constructor() {
     this.bars = [];
-
-    this.length = 120;
-    this.unit = 4;
+    this.length = 92; // window.width / unit
+    this.unit = 8;
+    this.state = 'default';
   }
 
   resize() {
@@ -43,16 +51,30 @@ class Indicator {
 
   init() {
     for (let i = 0; i < this.length; i++) {
-      const bar = new Bar(this.length, this.unit, (this.length * this.unit / 2) + (i * this.unit));
+      const bar = new Bar(this.length, this.unit, (document.documentElement.clientWidth * 0.7) + (i * this.unit));
       this.bars.push(bar);
     }
   }
 
+  setState(state) {
+    this.state = state;
+  }
+
   draw(c) {
-    this.bars.forEach(el => {
-      el.update();
-      el.draw(c);
+    c.beginPath();
+    c.moveTo(this.bars[0].position.x, this.bars[0].position.y);
+
+    this.bars.forEach((el, i) => {                            
+      if(this.state === 'bezier') {
+        el.updateCircle(i);
+        el.drawLine(c);
+      } else {
+        el.update();
+        el.draw(c);
+      }
     })
+    
+    c.fill();
   }
 }
 
@@ -62,14 +84,17 @@ class Bar {
     this.length = length;
 
     this.height = Math.random() * 10 + 5;
-    this.y = 600;
-    this.x = x;
-    this.speed = 0.4;
+    this.baroffset = 0.4;
     this.currentHeight = 1;
+
+    this.position = new Vector(x, 600);
+    this.velocity = new Vector(0, -1 * (Math.random() + 10));
+    this.acceleration = new Vector(0, 0);
+    this.destination = new Vector(0, 0);
   }
 
   resize() {
-    
+     
   }
 
   init() {
@@ -77,26 +102,67 @@ class Bar {
   }
 
   update() {
-    this.x = this.x - 2;
+    // add power
+    this.position.x = this.position.x - 2;
 
-    if(this.x <= 0) {
-      this.x = (this.length * this.unit);
+    // 초기화
+    if(this.position.x <= 0) {
+      this.position.x = (this.length * this.unit);
       this.currentHeight = 1;
     }
 
-    if(this.x < (this.length * this.unit / 2)) {
+    // Height
+    if(this.position.x < (document.documentElement.clientWidth / 2)) {
       if(this.currentHeight <= this.height) {
-        this.currentHeight += this.speed;
+        this.currentHeight += this.baroffset;
       }
     }
   }
-
+  
   // just one
   draw(c) {
     // end
     // console.log(this.currentHeight);
-    c.fillRect(this.x, this.y, 2, this.currentHeight);
+    c.fillRect(this.position.x, this.position.y, 2, this.currentHeight);
   }
+
+  updateBezier() {
+    this.integrate(0.5 * 0.8)
+  }
+
+  // just one
+  drawBezier(c) {
+    c.lineTo(this.position.x, this.position.y);
+    // console.log(this.position);
+  }
+
+  integrate(duration) {
+    this.position.addScaledVector(this.velocity, duration);
+  }
+
+  updateCircle(idx) {
+    this.destination.x = Math.cos(idx / this.length * 360) * 100 + 200;
+    this.destination.y = Math.sin(idx / this.length * 360) * 100 + 200;
+
+    const sub = this.destination.subtract(this.position);
+    const step = sub.magnitude() * 0.03 * 0.4;
+    sub.normalize();
+
+    // Add power
+    const power = new Vector(sub.x * step, sub.y * step);
+    this.position = this.position.add(power);
+    
+    // Interpolation lerp
+    // const power = new Vector(this.lerp(this.position.x, this.destination.x, 0.03 * 0.4), this.lerp(this.position.y, this.destination.y, 0.03 * 0.4))
+    // this.position = power;
+  }
+  
+  drawLine(c) {
+    c.lineTo(this.position.x, this.position.y);
+    // c.fillRect(this.position.x, this.position.y, 2, this.currentHeight);
+  }
+
+  lerp(min, max, fraction) { return (max - min) * fraction + min }
 }
 
 // Objects

@@ -97,6 +97,7 @@
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils */ "./src/js/utils.js");
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_utils__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./vector */ "./src/js/vector.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -104,16 +105,17 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 
+
 var canvas = document.querySelector('canvas');
 var c = canvas.getContext('2d');
 c.scale(2, 2); // FIXME: Not working
 
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+canvas.width = document.documentElement.clientWidth;
+canvas.height = document.documentElement.clientHeight;
 var indicator;
 var mouse = {
-  x: innerWidth / 2,
-  y: innerHeight / 2
+  x: document.documentElement.clientWidth / 2,
+  y: document.documentElement.clientHeight / 2
 };
 var colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66']; // Event Listeners
 
@@ -122,9 +124,15 @@ addEventListener('mousemove', function (event) {
   mouse.y = event.clientY;
 });
 addEventListener('resize', function () {
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
+  canvas.width = document.documentElement.clientWidth;
+  canvas.height = document.documentElement.clientHeight;
   init();
+});
+document.querySelector('.btn--bezier').addEventListener('click', function () {
+  indicator.setState('bezier');
+});
+document.querySelector('.btn--linear').addEventListener('click', function () {
+  indicator.setState('default');
 });
 
 var Indicator = /*#__PURE__*/function () {
@@ -132,8 +140,10 @@ var Indicator = /*#__PURE__*/function () {
     _classCallCheck(this, Indicator);
 
     this.bars = [];
-    this.length = 120;
-    this.unit = 4;
+    this.length = 92; // window.width / unit
+
+    this.unit = 8;
+    this.state = 'default';
   }
 
   _createClass(Indicator, [{
@@ -143,17 +153,32 @@ var Indicator = /*#__PURE__*/function () {
     key: "init",
     value: function init() {
       for (var i = 0; i < this.length; i++) {
-        var bar = new Bar(this.length, this.unit, this.length * this.unit / 2 + i * this.unit);
+        var bar = new Bar(this.length, this.unit, document.documentElement.clientWidth * 0.7 + i * this.unit);
         this.bars.push(bar);
       }
     }
   }, {
+    key: "setState",
+    value: function setState(state) {
+      this.state = state;
+    }
+  }, {
     key: "draw",
     value: function draw(c) {
-      this.bars.forEach(function (el) {
-        el.update();
-        el.draw(c);
+      var _this = this;
+
+      c.beginPath();
+      c.moveTo(this.bars[0].position.x, this.bars[0].position.y);
+      this.bars.forEach(function (el, i) {
+        if (_this.state === 'bezier') {
+          el.updateCircle(i);
+          el.drawLine(c);
+        } else {
+          el.update();
+          el.draw(c);
+        }
       });
+      c.fill();
     }
   }]);
 
@@ -167,10 +192,12 @@ var Bar = /*#__PURE__*/function () {
     this.unit = unit;
     this.length = length;
     this.height = Math.random() * 10 + 5;
-    this.y = 600;
-    this.x = x;
-    this.speed = 0.4;
+    this.baroffset = 0.4;
     this.currentHeight = 1;
+    this.position = new _vector__WEBPACK_IMPORTED_MODULE_1__["default"](x, 600);
+    this.velocity = new _vector__WEBPACK_IMPORTED_MODULE_1__["default"](0, -1 * (Math.random() + 10));
+    this.acceleration = new _vector__WEBPACK_IMPORTED_MODULE_1__["default"](0, 0);
+    this.destination = new _vector__WEBPACK_IMPORTED_MODULE_1__["default"](0, 0);
   }
 
   _createClass(Bar, [{
@@ -182,16 +209,18 @@ var Bar = /*#__PURE__*/function () {
   }, {
     key: "update",
     value: function update() {
-      this.x = this.x - 2;
+      // add power
+      this.position.x = this.position.x - 2; // 초기화
 
-      if (this.x <= 0) {
-        this.x = this.length * this.unit;
+      if (this.position.x <= 0) {
+        this.position.x = this.length * this.unit;
         this.currentHeight = 1;
-      }
+      } // Height
 
-      if (this.x < this.length * this.unit / 2) {
+
+      if (this.position.x < document.documentElement.clientWidth / 2) {
         if (this.currentHeight <= this.height) {
-          this.currentHeight += this.speed;
+          this.currentHeight += this.baroffset;
         }
       }
     } // just one
@@ -201,7 +230,47 @@ var Bar = /*#__PURE__*/function () {
     value: function draw(c) {
       // end
       // console.log(this.currentHeight);
-      c.fillRect(this.x, this.y, 2, this.currentHeight);
+      c.fillRect(this.position.x, this.position.y, 2, this.currentHeight);
+    }
+  }, {
+    key: "updateBezier",
+    value: function updateBezier() {
+      this.integrate(0.5 * 0.8);
+    } // just one
+
+  }, {
+    key: "drawBezier",
+    value: function drawBezier(c) {
+      c.lineTo(this.position.x, this.position.y); // console.log(this.position);
+    }
+  }, {
+    key: "integrate",
+    value: function integrate(duration) {
+      this.position.addScaledVector(this.velocity, duration);
+    }
+  }, {
+    key: "updateCircle",
+    value: function updateCircle(idx) {
+      this.destination.x = Math.cos(idx / this.length * 360) * 100 + 200;
+      this.destination.y = Math.sin(idx / this.length * 360) * 100 + 200;
+      var sub = this.destination.subtract(this.position);
+      var step = sub.magnitude() * 0.03 * 0.4;
+      sub.normalize(); // Add power
+
+      var power = new _vector__WEBPACK_IMPORTED_MODULE_1__["default"](sub.x * step, sub.y * step);
+      this.position = this.position.add(power); // Interpolation lerp
+      // const power = new Vector(this.lerp(this.position.x, this.destination.x, 0.03 * 0.4), this.lerp(this.position.y, this.destination.y, 0.03 * 0.4))
+      // this.position = power;
+    }
+  }, {
+    key: "drawLine",
+    value: function drawLine(c) {
+      c.lineTo(this.position.x, this.position.y); // c.fillRect(this.position.x, this.position.y, 2, this.currentHeight);
+    }
+  }, {
+    key: "lerp",
+    value: function lerp(min, max, fraction) {
+      return (max - min) * fraction + min;
     }
   }]);
 
@@ -291,6 +360,94 @@ module.exports = {
   randomColor: randomColor,
   distance: distance
 };
+
+/***/ }),
+
+/***/ "./src/js/vector.js":
+/*!**************************!*\
+  !*** ./src/js/vector.js ***!
+  \**************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/*
+2차원 벡터 클래스, three.js 사용 이전에 만든 클래스로 three.js에서 사용하는 벡터 클래스로 대체 가능
+*/
+
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Vector = /*#__PURE__*/function () {
+  function Vector(x, y) {
+    var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
+    _classCallCheck(this, Vector);
+
+    this.x = x;
+    this.y = y;
+    this.z = z;
+  }
+
+  _createClass(Vector, [{
+    key: "normalize",
+    value: function normalize() {
+      var m = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+      this.x /= m;
+      this.y /= m;
+      this.z /= m;
+    }
+  }, {
+    key: "magnitude",
+    value: function magnitude() {
+      return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+    }
+  }, {
+    key: "addScaledVector",
+    value: function addScaledVector(vector, scale) {
+      this.x += vector.x * scale;
+      this.y += vector.y * scale;
+      this.z += vector.z * scale;
+    }
+  }, {
+    key: "negative",
+    value: function negative() {
+      return new Vector(-this.x, -this.y, -this.z);
+    }
+  }, {
+    key: "add",
+    value: function add(v) {
+      if (v instanceof Vector) return new Vector(this.x + v.x, this.y + v.y, this.z + v.z);else return new Vector(this.x + v, this.y + v, this.z + v);
+    }
+  }, {
+    key: "subtract",
+    value: function subtract(vector) {
+      var v = new Vector(this.x - vector.x, this.y - vector.y, this.z - vector.z);
+      return v;
+    }
+  }, {
+    key: "multiply",
+    value: function multiply(v) {
+      if (v instanceof Vector) return new Vector(this.x * v.x, this.y * v.y, this.z * v.z);else return new Vector(this.x * v, this.y * v, this.z * v);
+    }
+  }, {
+    key: "clear",
+    value: function clear() {
+      this.x = 0;
+      this.y = 0;
+      this.z = 0;
+    }
+  }]);
+
+  return Vector;
+}();
+
+/* harmony default export */ __webpack_exports__["default"] = (Vector);
 
 /***/ })
 
