@@ -101,7 +101,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var Blob = function Blob(ctx) {
   _classCallCheck(this, Blob);
 
-  var circ = 4 * (Math.sqrt(2) - 1) / 3;
+  var circ = 8 * (Math.sqrt(2) - 1) / 3;
   var c = circ;
   var count = Math.PI;
   var ctx = ctx;
