@@ -86,6 +86,57 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./src/js/blob.js":
+/*!************************!*\
+  !*** ./src/js/blob.js ***!
+  \************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Blob; });
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Blob = function Blob(ctx) {
+  _classCallCheck(this, Blob);
+
+  var circ = 4 * (Math.sqrt(2) - 1) / 3;
+  var c = circ;
+  var count = Math.PI;
+  var ctx = ctx;
+
+  this.func = function drawBezierCircle(cx, cy, r) {
+    var c;
+    var offsetX = 20 * Math.sin(count);
+    var offsetY = 15 * Math.cos(count * 2);
+    r = r / 2;
+    count += 0.01;
+    ctx.translate(cx, cy); // translate to centerpoint
+
+    ctx.beginPath(); // top right
+
+    c = circ + 0.2 * Math.sin(count);
+    ctx.moveTo(offsetX + 0, offsetY + -r);
+    ctx.bezierCurveTo(offsetX + c * r, offsetY + -r, offsetX + r, offsetY + -c * r, offsetX + r, offsetY + 0); // bottom right
+
+    c = circ + 0.2 * Math.cos(count);
+    ctx.bezierCurveTo(offsetX + r, offsetY + c * r, offsetX + c * r, offsetY + r, offsetX + 0, offsetY + r); // bottom left
+
+    c = circ + 0.2 * Math.sin(count * 2);
+    ctx.bezierCurveTo(offsetX + -c * r, offsetY + r, offsetX + -r, offsetY + c * r, offsetX + -r, offsetY + 0); // top left
+
+    c = circ + 0.2 * Math.cos(count + 1);
+    ctx.bezierCurveTo(offsetX + -r, offsetY + -c * r, offsetX + -c * r, offsetY + -r, offsetX + 0, offsetY + -r);
+    ctx.fillStyle = "#f1f3f5";
+    ctx.fill();
+  };
+};
+
+
+
+/***/ }),
+
 /***/ "./src/js/canvas.js":
 /*!**************************!*\
   !*** ./src/js/canvas.js ***!
@@ -98,6 +149,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils */ "./src/js/utils.js");
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_utils__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _vector__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./vector */ "./src/js/vector.js");
+/* harmony import */ var _blob__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./blob */ "./src/js/blob.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -106,9 +158,11 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 
 
+
 var canvas = document.querySelector('canvas');
 var c = canvas.getContext('2d');
-c.scale(2, 2); // FIXME: Not working
+var devicePixelRatio = window.devicePixelRatio || 1;
+c.scale(devicePixelRatio, devicePixelRatio); // FIXME: Not working
 
 canvas.width = document.documentElement.clientWidth;
 canvas.height = document.documentElement.clientHeight;
@@ -117,7 +171,8 @@ var mouse = {
   x: document.documentElement.clientWidth / 2,
   y: document.documentElement.clientHeight / 2
 };
-var colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66']; // Event Listeners
+var colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66'];
+var blob = new _blob__WEBPACK_IMPORTED_MODULE_2__["default"](c); // Event Listeners
 
 addEventListener('mousemove', function (event) {
   mouse.x = event.clientX;
@@ -326,6 +381,11 @@ function animate() {
   //  object.update()
   // })
 
+  c.save();
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  blob.func(canvas.width / 2, canvas.height / 2 - 100, canvas.width * 0.8);
+  c.restore();
+  c.fillStyle = '#495057';
   indicator.draw(c);
 }
 

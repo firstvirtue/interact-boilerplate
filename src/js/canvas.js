@@ -1,9 +1,12 @@
 import utils from './utils'
 import Vector from './vector'
+import Blob from './blob'
 
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
-c.scale(2, 2); // FIXME: Not working
+
+const devicePixelRatio = window.devicePixelRatio || 1;
+c.scale(devicePixelRatio, devicePixelRatio); // FIXME: Not working
 
 canvas.width = document.documentElement.clientWidth
 canvas.height = document.documentElement.clientHeight
@@ -16,6 +19,8 @@ const mouse = {
 }
 
 const colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66']
+
+const blob = new Blob(c);
 
 // Event Listeners
 addEventListener('mousemove', (event) => {
@@ -210,6 +215,12 @@ function animate() {
   //  object.update()
   // })
 
+  c.save();
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  blob.func(canvas.width/2, canvas.height/2 - 100, canvas.width * 0.8);
+  c.restore()
+
+  c.fillStyle = '#495057'
   indicator.draw(c);
 }
 

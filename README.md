@@ -1,21 +1,12 @@
-Canvas Boilerplate is the go-to solution for quickly creating modern canvas pieces using ES6 and webpack.
+# Interact boilerplate
+힘의 연산(Add power)
+노멀 벡터로 방향 설정
+subtract -> magnitude 연산으로 나온 거리량을 fraction으로 쪼갠 만큼 위치벡터에 add 연산을 해서 이동
 
-## Getting Started
+보간(Interpolation)
+lerp 함수를 통하면 위의 fraction으로 쪼갠 만큼의 연산 결과가 나온다.
+*lerp(min, max, fraction) { return (max - min) * fraction + min }
+이를 현재 위치에 더함 
 
-1.  Clone the repo:
-
-        git clone https://github.com/christopher4lis/canvas-boilerplate.git
-
-2.  Install dependencies:
-
-        yarn
-
-    or
-
-        npm install
-
-3.  Run webpack:
-
-        npm start
-
-Your canvas piece should open up automatically at http://localhost:3000 and you should see 'HTML CANVAS BOILERPLATE' on hover.
+## REFERENCES
+https://github.com/christopher4lis/canvas-boilerplate.git
