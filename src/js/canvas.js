@@ -35,12 +35,12 @@ addEventListener('resize', () => {
   init()
 })
 
-document.querySelector('.btn--bezier').addEventListener('click', () => {
-  indicator.setState('bezier');
-})
-document.querySelector('.btn--linear').addEventListener('click', () => {
-  indicator.setState('default');
-})
+// document.querySelector('.btn--bezier').addEventListener('click', () => {
+//   indicator.setState('bezier');
+// })
+// document.querySelector('.btn--linear').addEventListener('click', () => {
+//   indicator.setState('default');
+// })
 
 class Indicator {
   constructor() {

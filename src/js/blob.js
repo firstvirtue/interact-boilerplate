@@ -1,6 +1,6 @@
 export default class Blob {
   constructor(ctx) {
-    var circ = (8*(Math.sqrt(2)-1)/3);
+    var circ = (7.5 * (Math.sqrt(2) - 1) / 3);
     var c = circ;
 
     var count = Math.PI;

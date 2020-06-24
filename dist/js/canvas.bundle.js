@@ -101,7 +101,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var Blob = function Blob(ctx) {
   _classCallCheck(this, Blob);
 
-  var circ = 8 * (Math.sqrt(2) - 1) / 3;
+  var circ = 7.5 * (Math.sqrt(2) - 1) / 3;
   var c = circ;
   var count = Math.PI;
   var ctx = ctx;
@@ -182,13 +182,12 @@ addEventListener('resize', function () {
   canvas.width = document.documentElement.clientWidth;
   canvas.height = document.documentElement.clientHeight;
   init();
-});
-document.querySelector('.btn--bezier').addEventListener('click', function () {
-  indicator.setState('bezier');
-});
-document.querySelector('.btn--linear').addEventListener('click', function () {
-  indicator.setState('default');
-});
+}); // document.querySelector('.btn--bezier').addEventListener('click', () => {
+//   indicator.setState('bezier');
+// })
+// document.querySelector('.btn--linear').addEventListener('click', () => {
+//   indicator.setState('default');
+// })
 
 var Indicator = /*#__PURE__*/function () {
   function Indicator() {
