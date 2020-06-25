@@ -108,8 +108,8 @@ var Blob = function Blob(ctx) {
 
   this.func = function drawBezierCircle(cx, cy, r) {
     var c;
-    var offsetX = 20 * Math.sin(count);
-    var offsetY = 15 * Math.cos(count * 2);
+    var offsetX = 2 * Math.sin(count);
+    var offsetY = 5 * Math.cos(count * 2);
     r = r / 2;
     count += 0.01;
     ctx.translate(cx, cy); // translate to centerpoint
