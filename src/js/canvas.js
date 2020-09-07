@@ -6,10 +6,17 @@ const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
 const devicePixelRatio = window.devicePixelRatio || 1;
-c.scale(devicePixelRatio, devicePixelRatio); // FIXME: Not working
 
-canvas.width = document.documentElement.clientWidth
-canvas.height = document.documentElement.clientHeight
+const w = 400
+const h = 640
+
+canvas.style.width = w + 'px'
+canvas.style.height = h + 'px'
+
+canvas.width = w * devicePixelRatio
+canvas.height = h * devicePixelRatio
+
+c.scale(devicePixelRatio, devicePixelRatio);
 
 let indicator;
 
@@ -218,6 +225,7 @@ function animate() {
   c.save();
   c.setTransform(1, 0, 0, 1, 0, 0);
   blob.func(canvas.width/2, canvas.height/2 - 100, canvas.width * 0.8);
+  // blob.drawGuideLine(canvas.width/2, canvas.height/2 - 100, canvas.width * 0.8)
   c.restore()
 
   c.fillStyle = '#495057'

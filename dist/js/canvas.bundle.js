@@ -130,6 +130,33 @@ var Blob = function Blob(ctx) {
     ctx.bezierCurveTo(offsetX + -r, offsetY + -c * r, offsetX + -c * r, offsetY + -r, offsetX + 0, offsetY + -r);
     ctx.fillStyle = "#f1f3f5";
     ctx.fill();
+    ctx.stroke();
+  };
+
+  this.drawGuideLine = function (cx, cy, r) {
+    var c;
+    var offsetX = 2 * Math.sin(count);
+    var offsetY = 5 * Math.cos(count * 2);
+    r = r / 2.1;
+    count += 0.01; // ctx.translate(cx,cy); // translate to centerpoint
+
+    ctx.beginPath(); // top right
+
+    c = circ + 0.2 * Math.sin(count);
+    ctx.moveTo(offsetX - r, offsetY + -r);
+    ctx.lineTo(offsetX + c * r, offsetY - c * r); // bottom right
+
+    c = circ + 0.2 * Math.cos(count);
+    ctx.lineTo(offsetX + c * r, offsetY + c * r); // bottom left
+
+    c = circ + 0.2 * Math.sin(count * 2);
+    ctx.lineTo(offsetX - c * r, offsetY + c * r); // top left
+
+    c = circ + 0.2 * Math.cos(count + 1);
+    ctx.lineTo(offsetX - r, offsetY + -r); // ctx.lineTo(offsetX + 0, offsetY + -r);
+    // ctx.fillStyle = "#f1f3f5";
+    // ctx.fill();
+    // ctx.stroke();
   };
 };
 
@@ -162,10 +189,13 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 var canvas = document.querySelector('canvas');
 var c = canvas.getContext('2d');
 var devicePixelRatio = window.devicePixelRatio || 1;
-c.scale(devicePixelRatio, devicePixelRatio); // FIXME: Not working
-
-canvas.width = document.documentElement.clientWidth;
-canvas.height = document.documentElement.clientHeight;
+var w = 400;
+var h = 640;
+canvas.style.width = w + 'px';
+canvas.style.height = h + 'px';
+canvas.width = w * devicePixelRatio;
+canvas.height = h * devicePixelRatio;
+c.scale(devicePixelRatio, devicePixelRatio);
 var indicator;
 var mouse = {
   x: document.documentElement.clientWidth / 2,
@@ -382,7 +412,8 @@ function animate() {
 
   c.save();
   c.setTransform(1, 0, 0, 1, 0, 0);
-  blob.func(canvas.width / 2, canvas.height / 2 - 100, canvas.width * 0.8);
+  blob.func(canvas.width / 2, canvas.height / 2 - 100, canvas.width * 0.8); // blob.drawGuideLine(canvas.width/2, canvas.height/2 - 100, canvas.width * 0.8)
+
   c.restore();
   c.fillStyle = '#495057';
   indicator.draw(c);
